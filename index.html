@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="description" content="محمد رمضان أحمد عبد الخالق - مبرمج ومتخصص أمن سيبراني">
+<meta name="author" content="محمد رمضان أحمد محمد عبد الخالق">
+<meta name="theme-color" content="#050810">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="X-Frame-Options" content="DENY">
+<meta http-equiv="Referrer-Policy" content="no-referrer">
+<meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()">
+<title>محمد رمضان أحمد عبد الخالق | مبرمج & أمن سيبراني</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050810;--bg2:#0a0f1e;--card:rgba(255,255,255,0.025);--card-border:rgba(255,255,255,0.07);
+  --text:#e0e8ff;--text2:#7799cc;--text3:#445566;
+  --green:#00ff88;--blue:#3388ff;--green-dim:rgba(0,255,136,0.08);--blue-dim:rgba(51,136,255,0.1);
+  --nav-bg:rgba(5,8,16,0.94);
+}
+[data-theme="light"]{
+  --bg:#f0f4ff;--bg2:#e4eaf8;--card:rgba(255,255,255,0.75);--card-border:rgba(0,0,0,0.08);
+  --text:#0a1628;--text2:#3a5080;--text3:#8899bb;
+  --green:#007744;--blue:#1155cc;--green-dim:rgba(0,119,68,0.08);--blue-dim:rgba(17,85,204,0.08);
+  --nav-bg:rgba(240,244,255,0.96);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font-family:'Cairo',sans-serif;min-height:100vh;overflow-x:hidden;line-height:1.6;-webkit-font-smoothing:antialiased;transition:background .35s,color .35s}
+::selection{background:rgba(0,255,136,0.2);color:#fff}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--green);border-radius:10px}
+
+/* ===== LOADING SCREEN ===== */
+#loader{position:fixed;inset:0;background:#050810;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Courier Prime',monospace}
+#loader.hide{animation:loaderOut .6s ease forwards}
+@keyframes loaderOut{to{opacity:0;pointer-events:none;visibility:hidden}}
+.loader-logo{font-size:clamp(22px,5vw,36px);color:#00ff88;letter-spacing:4px;margin-bottom:28px;animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.loader-lines{display:flex;flex-direction:column;gap:8px;width:min(360px,85vw)}
+.loader-line{font-size:12px;color:#445566;display:flex;align-items:center;gap:8px;opacity:0;animation:lineIn .4s ease forwards}
+.loader-line .ok{color:#00ff88}
+.loader-bar-wrap{width:min(360px,85vw);height:3px;background:rgba(255,255,255,0.06);border-radius:3px;margin-top:22px;overflow:hidden}
+.loader-bar{height:100%;width:0%;background:linear-gradient(90deg,#00ff88,#3388ff);border-radius:3px;transition:width .1s linear}
+
+/* ===== CANVAS (particle network) ===== */
+#particleCanvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+
+/* ===== LAYOUT ===== */
+.container{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:0 clamp(16px,4vw,32px) 80px}
+
+/* ===== NAV ===== */
+nav{display:flex;justify-content:space-between;align-items:center;padding:18px 0;border-bottom:1px solid rgba(0,255,136,0.1);position:sticky;top:0;background:var(--nav-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:100;gap:8px;flex-wrap:nowrap;min-height:64px}
+.logo{font-family:'Courier Prime',monospace;font-size:14px;color:var(--green);letter-spacing:3px;user-select:none;flex-shrink:0}
+.nav-links{display:flex;gap:clamp(10px,2vw,24px);list-style:none}
+.nav-links a{color:var(--text2);text-decoration:none;font-size:clamp(11px,1.6vw,13px);font-weight:500;transition:color .2s;cursor:pointer;padding:4px 0;border-bottom:1px solid transparent}
+.nav-links a:hover{color:var(--green);border-bottom-color:rgba(0,255,136,0.4)}
+.nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.theme-btn{background:var(--green-dim);border:1px solid rgba(0,255,136,0.22);border-radius:20px;padding:5px 11px;cursor:pointer;font-size:14px;color:var(--green);transition:all .2s;font-family:'Cairo',sans-serif;white-space:nowrap}
+.theme-btn:hover{background:rgba(0,255,136,0.15)}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;background:none;border:none}
+.hamburger span{width:22px;height:2px;background:var(--green);display:block;transition:all .3s;border-radius:2px}
+.hamburger.active span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.hamburger.active span:nth-child(2){opacity:0}
+.hamburger.active span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.mobile-menu{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(5,8,16,0.98);z-index:200;flex-direction:column;align-items:center;justify-content:center;gap:32px}
+.mobile-menu.open{display:flex}
+.mobile-menu a{color:#ddeeff;text-decoration:none;font-size:20px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:color .2s}
+.mobile-menu a:hover{color:var(--green)}
+.close-menu{position:absolute;top:20px;left:20px;background:none;border:none;color:var(--green);font-size:28px;cursor:pointer;padding:8px}
+
+/* ===== HERO ===== */
+.hero{min-height:calc(100vh - 64px);display:flex;flex-direction:column;justify-content:center;padding:clamp(50px,8vw,90px) 0 clamp(36px,5vw,56px)}
+.hero-inner{display:flex;align-items:center;gap:clamp(28px,5vw,60px);flex-wrap:wrap}
+.hero-text{flex:1;min-width:260px}
+
+/* AVATAR */
+.avatar-wrap{position:relative;flex-shrink:0}
+.avatar-ring{width:clamp(130px,20vw,190px);height:clamp(130px,20vw,190px);border-radius:50%;background:linear-gradient(135deg,var(--green),var(--blue),var(--green));padding:3px;animation:spin 6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.avatar-inner{width:100%;height:100%;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.avatar-inner img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.avatar-placeholder{font-size:clamp(44px,8vw,70px);user-select:none}
+.avatar-pulse{position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--green);opacity:.3;animation:avatarPulse 2.5s ease-in-out infinite}
+@keyframes avatarPulse{0%,100%{transform:scale(1);opacity:.3}50%{transform:scale(1.06);opacity:.1}}
+.online-badge{position:absolute;bottom:8px;right:8px;width:18px;height:18px;background:#00ff88;border-radius:50%;border:3px solid var(--bg);animation:blink 2s ease-in-out infinite}
+
+.terminal-tag{display:inline-flex;align-items:center;gap:8px;font-family:'Courier Prime',monospace;font-size:12px;color:var(--green);background:var(--green-dim);border:1px solid rgba(0,255,136,0.2);padding:6px 14px;border-radius:4px;margin-bottom:clamp(16px,3vw,26px);width:fit-content}
+.dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:blink 1.2s ease-in-out infinite;flex-shrink:0}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.15}}
+.greeting{font-size:clamp(12px,2vw,15px);color:var(--text2);margin-bottom:8px;letter-spacing:1px}
+.name{font-size:clamp(26px,6vw,54px);font-weight:900;color:var(--text);line-height:1.1;margin-bottom:8px}
+.name span{color:var(--green)}
+.typewriter-wrap{font-size:clamp(13px,2.5vw,20px);font-weight:400;color:var(--text2);margin-bottom:clamp(16px,3vw,22px);min-height:30px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.typed-text{color:var(--blue);font-weight:700}
+.cursor-blink{display:inline-block;width:2px;height:1.1em;background:var(--blue);vertical-align:text-bottom;animation:cur .7s step-end infinite}
+@keyframes cur{0%,100%{opacity:1}50%{opacity:0}}
+.bio{max-width:540px;font-size:clamp(13px,1.8vw,15px);line-height:2;color:var(--text2);margin-bottom:clamp(22px,4vw,34px)}
+.cta-row{display:flex;gap:10px;flex-wrap:wrap}
+.btn-primary{background:var(--green);color:#050810;padding:10px clamp(16px,3vw,24px);border-radius:6px;font-family:'Cairo',sans-serif;font-size:clamp(12px,1.8vw,14px);font-weight:700;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:5px;touch-action:manipulation}
+.btn-primary:hover{filter:brightness(1.1);transform:translateY(-2px)}
+.btn-outline{background:transparent;color:var(--green);padding:10px clamp(16px,3vw,24px);border-radius:6px;font-family:'Cairo',sans-serif;font-size:clamp(12px,1.8vw,14px);font-weight:600;border:1px solid rgba(0,255,136,0.35);cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:5px;touch-action:manipulation}
+.btn-outline:hover{background:var(--green-dim);transform:translateY(-2px)}
+.btn-cv{background:linear-gradient(135deg,var(--blue),#5500ff);color:#fff;padding:10px clamp(16px,3vw,24px);border-radius:6px;font-family:'Cairo',sans-serif;font-size:clamp(12px,1.8vw,14px);font-weight:700;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:5px;touch-action:manipulation;text-decoration:none}
+.btn-cv:hover{filter:brightness(1.15);transform:translateY(-2px)}
+
+/* ===== STATS ===== */
+.stats-wrap{padding:clamp(22px,4vw,40px) 0}
+.stat-row{display:flex;gap:clamp(18px,4vw,48px);flex-wrap:wrap;align-items:center}
+.stat{text-align:center;min-width:56px}
+.stat-num{font-size:clamp(20px,4vw,32px);font-weight:900;color:var(--green);font-family:'Courier Prime',monospace;line-height:1}
+.stat-label{font-size:clamp(10px,1.4vw,12px);color:var(--text3);margin-top:4px}
+.visitor-wrap{display:inline-flex;align-items:center;gap:8px;background:var(--green-dim);border:1px solid rgba(0,255,136,0.18);border-radius:8px;padding:7px 14px;font-family:'Courier Prime',monospace;font-size:12px;color:var(--green);margin-top:14px}
+.visitor-num{font-size:16px;font-weight:700}
+.divider-line{height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,136,0.16),transparent);margin:4px 0}
+
+/* ===== SECTIONS ===== */
+.section{padding:clamp(44px,7vw,74px) 0;border-top:1px solid rgba(255,255,255,0.05)}
+.section-label{font-family:'Courier Prime',monospace;font-size:11px;color:var(--green);letter-spacing:4px;margin-bottom:10px;text-transform:uppercase}
+.section-title{font-size:clamp(20px,4vw,28px);font-weight:700;color:var(--text);margin-bottom:clamp(22px,4vw,38px)}
+
+/* ===== SKILLS ===== */
+.skills-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:clamp(10px,2vw,14px)}
+.skill-card{background:var(--card);border:1px solid var(--card-border);border-radius:10px;padding:clamp(14px,2.5vw,20px);transition:all .2s}
+.skill-card:hover{border-color:rgba(0,255,136,0.3);background:var(--green-dim);transform:translateY(-3px)}
+.skill-icon{font-size:20px;margin-bottom:8px}
+.skill-name{font-size:clamp(12px,1.8vw,14px);font-weight:700;color:var(--text);margin-bottom:4px}
+.skill-desc{font-size:clamp(10px,1.4vw,12px);color:var(--text2);line-height:1.6}
+
+/* ===== TIMELINE ===== */
+.timeline{position:relative;padding-right:28px}
+.timeline::before{content:'';position:absolute;right:0;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--green),var(--blue),transparent)}
+.tl-item{position:relative;padding-right:28px;padding-bottom:36px}
+.tl-item:last-child{padding-bottom:0}
+.tl-dot{position:absolute;right:-7px;top:4px;width:14px;height:14px;background:var(--green);border-radius:50%;border:2px solid var(--bg);box-shadow:0 0 10px rgba(0,255,136,0.5)}
+.tl-date{font-family:'Courier Prime',monospace;font-size:11px;color:var(--green);letter-spacing:2px;margin-bottom:6px}
+.tl-card{background:var(--card);border:1px solid var(--card-border);border-radius:10px;padding:clamp(14px,3vw,20px);transition:all .2s}
+.tl-card:hover{border-color:rgba(0,255,136,0.25);transform:translateX(-4px)}
+.tl-title{font-size:clamp(14px,2.2vw,16px);font-weight:700;color:var(--text);margin-bottom:4px}
+.tl-company{font-size:12px;color:var(--blue);font-weight:600;margin-bottom:8px}
+.tl-desc{font-size:clamp(11px,1.6vw,13px);color:var(--text2);line-height:1.7}
+
+/* ===== SERVICES ===== */
+.services-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:clamp(12px,2vw,18px)}
+.service-card{background:var(--card);border:1px solid var(--card-border);border-radius:14px;padding:clamp(18px,3vw,26px);transition:all .2s;position:relative;overflow:hidden}
+.service-card::before{content:'';position:absolute;top:0;right:0;left:0;height:2px;background:linear-gradient(90deg,var(--green),var(--blue));opacity:0;transition:opacity .3s}
+.service-card:hover::before{opacity:1}
+.service-card:hover{border-color:rgba(0,255,136,0.25);transform:translateY(-4px)}
+.service-icon{font-size:28px;margin-bottom:12px}
+.service-name{font-size:clamp(14px,2vw,16px);font-weight:700;color:var(--text);margin-bottom:8px}
+.service-desc{font-size:clamp(11px,1.5vw,13px);color:var(--text2);line-height:1.7;margin-bottom:14px}
+.service-price{display:inline-flex;align-items:center;gap:6px;background:var(--green-dim);border:1px solid rgba(0,255,136,0.22);border-radius:6px;padding:5px 12px;font-family:'Courier Prime',monospace;font-size:13px;color:var(--green);font-weight:700}
+
+/* ===== PROJECTS ===== */
+.projects-list{display:flex;flex-direction:column;gap:clamp(10px,2vw,16px)}
+.project-card{background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:clamp(14px,3.5vw,24px);display:flex;gap:clamp(10px,2.5vw,18px);align-items:flex-start;transition:all .2s}
+.project-card:hover{border-color:rgba(51,136,255,0.3);background:var(--blue-dim)}
+.project-num{font-family:'Courier Prime',monospace;font-size:13px;color:var(--blue);min-width:24px;font-weight:700;opacity:.5;padding-top:2px;flex-shrink:0}
+.project-content{flex:1;min-width:0}
+.project-title{font-size:clamp(13px,2.2vw,15px);font-weight:700;color:var(--text);margin-bottom:6px}
+.project-desc{font-size:clamp(11px,1.6vw,13px);color:var(--text2);line-height:1.7}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.tag{font-size:11px;font-family:'Courier Prime',monospace;padding:3px 9px;border-radius:4px;background:var(--blue-dim);color:var(--blue);border:1px solid rgba(51,136,255,0.2);white-space:nowrap}
+
+/* ===== CONTACT ===== */
+.contact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:clamp(10px,2.5vw,16px);max-width:520px}
+.contact-item{background:var(--card);border:1px solid var(--card-border);border-radius:14px;padding:clamp(16px,3.5vw,24px);text-align:center;transition:all .2s;cursor:pointer;text-decoration:none;display:block;touch-action:manipulation;position:relative;overflow:hidden}
+.contact-item::before{content:'';position:absolute;top:0;right:0;left:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent);opacity:0;transition:opacity .3s}
+.contact-item:hover::before{opacity:1}
+.contact-item:hover{border-color:rgba(0,255,136,0.3);background:var(--green-dim);transform:translateY(-3px)}
+.contact-icon{font-size:26px;margin-bottom:8px;display:block}
+.contact-label{font-size:10px;color:var(--text3);margin-bottom:5px;letter-spacing:2px;text-transform:uppercase}
+.contact-value{font-size:clamp(12px,1.8vw,14px);font-weight:600;color:var(--text);word-break:break-all;direction:ltr;display:block}
+.phone-num{font-family:'Courier Prime',monospace;font-size:clamp(14px,2.5vw,18px)!important;color:var(--green)!important;letter-spacing:2px;font-weight:700!important}
+.email-val{color:var(--blue)!important}
+.copy-btn{display:inline-flex;align-items:center;gap:5px;background:var(--green-dim);border:1px solid rgba(0,255,136,0.25);border-radius:6px;padding:5px 12px;font-family:"Courier Prime",monospace;font-size:11px;color:var(--green);cursor:pointer;transition:all .2s;margin-top:8px;letter-spacing:1px}
+.copy-btn:hover{background:rgba(0,255,136,0.15)}
+.copy-btn.copied{background:rgba(0,255,136,0.2);color:#fff}
+.lang-btn{background:var(--blue-dim);border:1px solid rgba(51,136,255,0.25);border-radius:20px;padding:5px 11px;cursor:pointer;font-size:13px;color:var(--blue);transition:all .2s;font-family:"Cairo",sans-serif;white-space:nowrap;font-weight:700}
+.lang-btn:hover{background:rgba(51,136,255,0.15)}
+.share-wrap{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.share-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:8px;font-family:"Cairo",sans-serif;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all .2s;text-decoration:none}
+.share-wa{background:#25d366;color:#fff}
+.share-wa:hover{background:#20ba5a;transform:translateY(-2px)}
+.share-copy{background:var(--green-dim);color:var(--green);border:1px solid rgba(0,255,136,0.25)}
+.share-copy:hover{background:rgba(0,255,136,0.15);transform:translateY(-2px)}
+.share-copy.copied{background:rgba(0,255,136,0.2)}
+
+/* FORM */
+.contact-form{background:var(--card);border:1px solid var(--card-border);border-radius:14px;padding:clamp(18px,4vw,30px);margin-top:24px}
+.contact-form h3{font-size:16px;font-weight:700;color:var(--text);margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+.form-group label{font-size:11px;color:var(--text2);font-weight:600;letter-spacing:1px}
+.form-group input,.form-group textarea{background:rgba(255,255,255,0.04);border:1px solid var(--card-border);border-radius:8px;padding:9px 13px;color:var(--text);font-family:'Cairo',sans-serif;font-size:14px;transition:all .2s;outline:none;resize:none;width:100%}
+[data-theme="light"] .form-group input,[data-theme="light"] .form-group textarea{background:rgba(0,0,0,0.04)}
+.form-group input:focus,.form-group textarea:focus{border-color:var(--green);background:var(--green-dim)}
+.form-group textarea{min-height:100px}
+.btn-send{background:var(--green);color:#050810;padding:10px 24px;border-radius:6px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;margin-top:4px}
+.btn-send:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.form-success{display:none;text-align:center;padding:18px;color:var(--green);font-weight:700;font-size:15px}
+.form-success.show{display:block}
+
+/* FOOTER */
+.footer{text-align:center;padding:clamp(24px,4vw,36px) 0 20px;border-top:1px solid rgba(255,255,255,0.04);font-size:clamp(10px,1.4vw,12px);color:var(--text3);font-family:'Courier Prime',monospace;letter-spacing:1px;line-height:1.9}
+.footer span{color:var(--green)}
+.footer-lock{margin-top:4px;font-size:10px;opacity:.35;letter-spacing:2px}
+
+/* SCROLL TOP */
+/* WELCOME TOAST */
+.welcome-toast{position:fixed;top:24px;right:24px;z-index:9000;display:flex;align-items:flex-start;gap:12px;background:linear-gradient(135deg,rgba(5,8,16,0.97),rgba(10,15,30,0.97));border:1px solid rgba(0,255,136,0.35);border-radius:14px;padding:16px 18px;max-width:320px;width:calc(100vw - 48px);box-shadow:0 8px 32px rgba(0,255,136,0.15),0 2px 8px rgba(0,0,0,0.5);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);transform:translateX(120%);transition:transform .5s cubic-bezier(.34,1.56,.64,1),opacity .5s ease;opacity:0;pointer-events:none}
+.welcome-toast.show{transform:translateX(0);opacity:1;pointer-events:all}
+.welcome-toast.hide{transform:translateX(120%);opacity:0}
+[data-theme="light"] .welcome-toast{background:linear-gradient(135deg,rgba(240,244,255,0.97),rgba(228,234,248,0.97));border-color:rgba(0,119,68,0.3);box-shadow:0 8px 32px rgba(0,119,68,0.12),0 2px 8px rgba(0,0,0,0.1)}
+.toast-icon{font-size:28px;flex-shrink:0;animation:waveHand .8s ease-in-out 1s 3}
+@keyframes waveHand{0%,100%{transform:rotate(0)}25%{transform:rotate(20deg)}75%{transform:rotate(-10deg)}}
+.toast-body{flex:1;min-width:0}
+.toast-title{font-size:14px;font-weight:900;color:var(--green);margin-bottom:4px;font-family:'Cairo',sans-serif}
+.toast-msg{font-size:12px;color:var(--text2);line-height:1.6;font-family:'Cairo',sans-serif}
+.toast-msg span{color:var(--green);font-weight:700}
+.toast-close{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:0 0 0 4px;line-height:1;flex-shrink:0;transition:color .2s}
+.toast-close:hover{color:var(--green)}
+.toast-bar{position:absolute;bottom:0;right:0;left:0;height:3px;border-radius:0 0 14px 14px;background:linear-gradient(90deg,var(--green),var(--blue));transform-origin:right;animation:toastBar 5s linear 0.6s forwards}
+@keyframes toastBar{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+.scroll-top{position:fixed;bottom:24px;left:24px;width:40px;height:40px;background:var(--green-dim);border:1px solid rgba(0,255,136,0.25);border-radius:50%;color:var(--green);font-size:17px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;opacity:0;pointer-events:none;z-index:50;text-decoration:none}
+.scroll-top.visible{opacity:1;pointer-events:all}
+.scroll-top:hover{background:rgba(0,255,136,0.2);transform:translateY(-3px)}
+
+/* WHATSAPP FLOAT */
+.wa-btn{position:fixed;bottom:80px;left:24px;width:50px;height:50px;background:#25d366;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:50;text-decoration:none;box-shadow:0 4px 18px rgba(37,211,102,0.4);transition:all .2s;animation:waPulse 2.5s ease-in-out infinite}
+.wa-btn:hover{transform:scale(1.12);box-shadow:0 6px 24px rgba(37,211,102,0.6);animation:none}
+@keyframes waPulse{0%,100%{box-shadow:0 4px 18px rgba(37,211,102,0.4)}50%{box-shadow:0 4px 28px rgba(37,211,102,0.7)}}
+.wa-btn svg{width:26px;height:26px;fill:#fff}
+.wa-tooltip{position:absolute;left:60px;background:#25d366;color:#fff;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;padding:5px 10px;border-radius:6px;white-space:nowrap;opacity:0;transition:opacity .2s;pointer-events:none}
+.wa-btn:hover .wa-tooltip{opacity:1}
+
+/* PROGRESS BAR */
+.progress-bar{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--green),var(--blue));z-index:999;width:0%;transition:width .1s linear}
+
+/* FADE IN */
+.fade-in{opacity:0;transform:translateY(20px);transition:opacity .55s ease,transform .55s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}#particleCanvas{display:none}}
+@media(max-width:640px){
+  .nav-links{display:none}.hamburger{display:flex}
+  .hero-inner{flex-direction:column-reverse;align-items:flex-start;gap:20px}
+  .avatar-wrap{align-self:center}
+  .form-grid{grid-template-columns:1fr}.form-group.full{grid-column:1}
+  .contact-grid{grid-template-columns:1fr;max-width:100%}
+  .project-card{flex-direction:column;gap:6px}
+  .services-grid{grid-template-columns:1fr}
+}
+@media(max-width:380px){
+  .cta-row{flex-direction:column}
+  .btn-primary,.btn-outline,.btn-cv{justify-content:center;width:100%}
+}
+/* ===== EXTRA RESPONSIVE FIXES ===== */
+/* Small phones 320px */
+@media(max-width:359px){
+  .name{font-size:24px}
+  .logo{font-size:11px;letter-spacing:1px}
+  .theme-btn{font-size:11px;padding:4px 8px}
+  .lang-btn{font-size:11px;padding:4px 8px}
+  .terminal-tag{font-size:10px;padding:5px 10px}
+  .stat-row{gap:12px}
+  .stat-num{font-size:20px}
+  .wa-btn{width:44px;height:44px;bottom:70px;left:14px}
+  .scroll-top{width:36px;height:36px;bottom:18px;left:14px}
+  .welcome-toast{right:12px;top:12px;width:calc(100vw - 24px);padding:12px 14px}
+  .cta-row{gap:8px}
+  .btn-primary,.btn-outline,.btn-cv{font-size:12px;padding:9px 14px}
+}
+/* Normal phones 360-480px */
+@media(min-width:360px) and (max-width:480px){
+  .name{font-size:28px}
+  .stat-row{gap:16px}
+}
+/* Large phones 481-640px */
+@media(min-width:481px) and (max-width:640px){
+  .name{font-size:34px}
+  .hero-inner{gap:28px}
+}
+/* Tablets 641-1024px */
+@media(min-width:641px) and (max-width:1024px){
+  .container{max-width:100%;padding:0 clamp(20px,4vw,40px) 80px}
+  .skills-grid{grid-template-columns:repeat(3,1fr)}
+  .services-grid{grid-template-columns:repeat(2,1fr)}
+  .nav-links{gap:16px}
+  .nav-links a{font-size:13px}
+}
+/* Large tablets / small laptops 768-1024px */
+@media(min-width:768px) and (max-width:1024px){
+  .hero-inner{gap:40px}
+  .avatar-ring{width:160px;height:160px}
+}
+/* Touch devices */
+@media(hover:none) and (pointer:coarse){
+  .skill-card:hover,.project-card:hover,.service-card:hover,.contact-item:hover{transform:none}
+  .btn-primary:hover,.btn-outline:hover,.btn-cv:hover{transform:none}
+  .skill-card:active{border-color:rgba(0,255,136,0.3);background:var(--green-dim)}
+  .btn-primary:active{filter:brightness(1.1)}
+  .wa-btn{animation:waPulse 2.5s ease-in-out infinite}
+}
+/* Landscape phones */
+@media(max-height:500px) and (orientation:landscape){
+  .hero{min-height:auto;padding:30px 0}
+  .avatar-ring{width:100px;height:100px}
+  .name{font-size:26px}
+  .hero-inner{gap:20px;align-items:flex-start}
+}
+/* High DPI / Retina screens */
+@media(-webkit-min-device-pixel-ratio:2),(min-resolution:192dpi){
+  .avatar-ring{border-width:2px}
+  .progress-bar{height:2px}
+}
+/* Very large screens */
+@media(min-width:1400px){
+  .container{max-width:1100px}
+  .name{font-size:64px}
+}
+/* iPhone safe area (notch) */
+@supports(padding:max(0px)){
+  .container{
+    padding-right:max(clamp(16px,4vw,32px), env(safe-area-inset-right));
+    padding-left:max(clamp(16px,4vw,32px), env(safe-area-inset-left));
+  }
+  .wa-btn{left:max(24px, env(safe-area-inset-left))}
+  .scroll-top{left:max(24px, env(safe-area-inset-left))}
+}
+@media print{.matrix-bg,#particleCanvas,.scroll-top,.wa-btn,.progress-bar,.hamburger,nav,#loader{display:none}body{background:#fff;color:#111}.name{color:#111}.name span{color:#007744}}
+</style>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div id="loader">
+  <div class="loader-logo">MRA_SEC</div>
+  <div class="loader-lines" id="loaderLines"></div>
+  <div class="loader-bar-wrap"><div class="loader-bar" id="loaderBar"></div></div>
+</div>
+
+<div class="progress-bar" id="progress"></div>
+
+<!-- WELCOME TOAST -->
+<div class="welcome-toast" id="welcomeToast" role="alert" aria-live="polite">
+  <div class="toast-icon">👋</div>
+  <div class="toast-body">
+    <div class="toast-title">أهلاً وسهلاً! 🔐</div>
+    <div class="toast-msg">يسعدني زيارتك! أنا <span>محمد رمضان</span>، مبرمج ومتخصص أمن سيبراني. تواصل معي في أي وقت 🚀</div>
+  </div>
+  <button class="toast-close" onclick="closeToast()" aria-label="إغلاق">✕</button>
+  <div class="toast-bar"></div>
+</div>
+<canvas id="particleCanvas" aria-hidden="true"></canvas>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="close-menu" id="closeMenu">✕</button>
+  <a onclick="closeNav();scrollToId('skills')">المهارات</a>
+  <a onclick="closeNav();scrollToId('experience')">الخبرات</a>
+  <a onclick="closeNav();scrollToId('services')">الخدمات</a>
+  <a onclick="closeNav();scrollToId('projects')">المشاريع</a>
+  <a onclick="closeNav();scrollToId('contact')">التواصل</a>
+</div>
+
+<div class="container">
+
+  <!-- NAV -->
+  <nav>
+    <div class="logo">MRA_SEC</div>
+    <ul class="nav-links">
+      <li><a onclick="scrollToId('skills')">المهارات</a></li>
+      <li><a onclick="scrollToId('experience')">الخبرات</a></li>
+      <li><a onclick="scrollToId('services')">الخدمات</a></li>
+      <li><a onclick="scrollToId('projects')">المشاريع</a></li>
+      <li><a onclick="scrollToId('contact')">التواصل</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="theme-btn" id="themeBtn">🌙 ليلي</button>
+      <button class="lang-btn" id="langBtn">EN</button>
+      <button class="hamburger" id="hamburger" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-text">
+        <div class="terminal-tag"><div class="dot"></div><span>available_for_work.exe</span></div>
+        <p class="greeting">مرحباً، أنا</p>
+        <h1 class="name">محمد رمضان<br><span>أحمد عبد الخالق</span></h1>
+        <div class="typewriter-wrap">
+          <span>متخصص في</span>
+          <span class="typed-text" id="typed"></span>
+          <span class="cursor-blink"></span>
+        </div>
+        <p class="bio">مبرمج شغوف ومتخصص في مجال الأمن السيبراني، أجمع بين مهارات البرمجة القوية وخبرة عميقة في حماية الأنظمة واكتشاف الثغرات. أسعى دائماً لبناء حلول تقنية آمنة ومتينة.</p>
+        <div class="cta-row">
+          <button class="btn-primary" onclick="scrollToId('contact')">📬 تواصل معي</button>
+          <button class="btn-outline" onclick="scrollToId('projects')">🗂️ المشاريع</button>
+          <a class="btn-cv" href="#" onclick="downloadCV(event)">📄 السيرة الذاتية</a>
+        </div>
+      </div>
+      <!-- AVATAR -->
+      <div class="avatar-wrap">
+        <div class="avatar-ring">
+          <div class="avatar-inner">
+            <div class="avatar-placeholder">👨‍💻</div>
+          </div>
+        </div>
+        <div class="avatar-pulse"></div>
+        <div class="online-badge"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider-line"></div>
+
+  <!-- STATS -->
+  <div class="stats-wrap fade-in">
+    <div class="stat-row">
+      <div class="stat"><div class="stat-num">5+</div><div class="stat-label">سنوات خبرة</div></div>
+      <div class="stat"><div class="stat-num">20+</div><div class="stat-label">مشروع مكتمل</div></div>
+      <div class="stat"><div class="stat-num">10+</div><div class="stat-label">ثغرة مكتشفة</div></div>
+      <div class="stat"><div class="stat-num">CTF</div><div class="stat-label">منافسات أمنية</div></div>
+    </div>
+    <div class="visitor-wrap">👁️ عدد الزوار: <span class="visitor-num" id="visitorCount">...</span></div>
+  </div>
+
+  <div class="divider-line"></div>
+
+  <!-- SKILLS -->
+  <section class="section fade-in" id="skills">
+    <p class="section-label">// المهارات</p>
+    <h2 class="section-title">ما أتقنه</h2>
+    <div class="skills-grid">
+      <div class="skill-card"><div class="skill-icon">🛡️</div><div class="skill-name">اختبار الاختراق</div><div class="skill-desc">فحص الأنظمة واكتشاف الثغرات بأدوات متخصصة</div></div>
+      <div class="skill-card"><div class="skill-icon">💻</div><div class="skill-name">البرمجة</div><div class="skill-desc">Python · JavaScript · C++ · Bash</div></div>
+      <div class="skill-card"><div class="skill-icon">🔍</div><div class="skill-name">تحليل الشبكات</div><div class="skill-desc">مراقبة حركة الشبكة واكتشاف التهديدات</div></div>
+      <div class="skill-card"><div class="skill-icon">🔐</div><div class="skill-name">التشفير</div><div class="skill-desc">تطبيق بروتوكولات التشفير وحماية البيانات</div></div>
+      <div class="skill-card"><div class="skill-icon">🌐</div><div class="skill-name">أمان الويب</div><div class="skill-desc">OWASP · SQL Injection · XSS</div></div>
+      <div class="skill-card"><div class="skill-icon">⚙️</div><div class="skill-name">Linux &amp; Systems</div><div class="skill-desc">إدارة وتأمين الأنظمة والخوادم</div></div>
+    </div>
+  </section>
+
+  <!-- EXPERIENCE TIMELINE -->
+  <section class="section fade-in" id="experience">
+    <p class="section-label">// الخبرات</p>
+    <h2 class="section-title">المسيرة المهنية</h2>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-date">2022 — الآن</div>
+        <div class="tl-card">
+          <div class="tl-title">متخصص أمن سيبراني</div>
+          <div class="tl-company">🏢 شركة تقنية — مصر</div>
+          <div class="tl-desc">اختبار اختراق الأنظمة والشبكات، إعداد تقارير الثغرات، وتطوير سياسات الأمان للمؤسسات.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-date">2020 — 2022</div>
+        <div class="tl-card">
+          <div class="tl-title">مطور برمجيات</div>
+          <div class="tl-company">🏢 شركة برمجيات — مصر</div>
+          <div class="tl-desc">تطوير تطبيقات ويب وأدوات أمنية باستخدام Python وJavaScript مع التركيز على الأمان.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-date">2019 — 2020</div>
+        <div class="tl-card">
+          <div class="tl-title">مستقل Freelancer</div>
+          <div class="tl-company">🌐 العمل الحر</div>
+          <div class="tl-desc">تقديم خدمات فحص الثغرات واختبار الاختراق لعملاء متعددين محلياً وإقليمياً.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="section fade-in" id="services">
+    <p class="section-label">// الخدمات</p>
+    <h2 class="section-title">ما أقدمه</h2>
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="service-icon">🔍</div>
+        <div class="service-name">اختبار الاختراق</div>
+        <div class="service-desc">فحص شامل للأنظمة والمواقع والشبكات لاكتشاف الثغرات قبل المهاجمين مع تقرير مفصل.</div>
+        
+      </div>
+      <div class="service-card">
+        <div class="service-icon">🌐</div>
+        <div class="service-name">تأمين المواقع</div>
+        <div class="service-desc">مراجعة وتأمين تطبيقات الويب ضد OWASP Top 10 وحمايتها من الاختراق.</div>
+        
+      </div>
+      <div class="service-card">
+        <div class="service-icon">💻</div>
+        <div class="service-name">تطوير أدوات أمنية</div>
+        <div class="service-desc">برمجة أدوات مخصصة لفحص الأمان وأتمتة المهام الأمنية بلغة Python.</div>
+        
+      </div>
+      <div class="service-card">
+        <div class="service-icon">📋</div>
+        <div class="service-name">استشارات أمنية</div>
+        <div class="service-desc">تقييم الوضع الأمني للمؤسسة ووضع خطة حماية شاملة ومراجعة السياسات الأمنية.</div>
+        
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section class="section fade-in" id="projects">
+    <p class="section-label">// المشاريع</p>
+    <h2 class="section-title">أبرز أعمالي</h2>
+    <div class="projects-list">
+      <article class="project-card">
+        <div class="project-num">01</div>
+        <div class="project-content">
+          <h3 class="project-title">نظام كشف التسلل الذكي</h3>
+          <p class="project-desc">نظام IDS يعتمد على الذكاء الاصطناعي لرصد الأنشطة المشبوهة في الوقت الفعلي.</p>
+          <div class="tags"><span class="tag">Python</span><span class="tag">Machine Learning</span><span class="tag">Network Security</span></div>
+        </div>
+      </article>
+      <article class="project-card">
+        <div class="project-num">02</div>
+        <div class="project-content">
+          <h3 class="project-title">أداة فحص ثغرات الويب</h3>
+          <p class="project-desc">أداة تكشف ثغرات OWASP Top 10 تلقائياً مع تقارير مفصلة.</p>
+          <div class="tags"><span class="tag">Python</span><span class="tag">OWASP</span><span class="tag">Web Security</span></div>
+        </div>
+      </article>
+      <article class="project-card">
+        <div class="project-num">03</div>
+        <div class="project-content">
+          <h3 class="project-title">منصة إدارة الحوادث الأمنية</h3>
+          <p class="project-desc">منصة لتتبع وإدارة الحوادث الأمنية مع لوحة تحكم تحليلية.</p>
+          <div class="tags"><span class="tag">JavaScript</span><span class="tag">React</span><span class="tag">SOC</span></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="section fade-in" id="contact">
+    <p class="section-label">// التواصل</p>
+    <h2 class="section-title">تواصل معي</h2>
+    <div class="contact-grid">
+      <a class="contact-item" href="tel:+201031066237">
+        <span class="contact-icon">📱</span>
+        <span class="contact-label">الهاتف / واتساب</span>
+        <span class="contact-value phone-num">01031066237</span>
+        <button class="copy-btn" id="copyPhoneBtn" onclick="copyPhone()">📋 نسخ الرقم</button>
+      </a>
+      <a class="contact-item" href="mailto:cr7@gmail.com">
+        <span class="contact-icon">✉️</span>
+        <span class="contact-label">البريد الإلكتروني</span>
+        <span class="contact-value email-val">cr7@gmail.com</span>
+      </a>
+    </div>
+    <div class="contact-form">
+      <h3>💬 أرسل رسالة مباشرة</h3>
+      <div id="formSuccess" class="form-success">✅ تم إرسال رسالتك! سأرد عليك قريباً.</div>
+      <div id="formContent">
+        <div class="form-grid">
+          <div class="form-group"><label>الاسم</label><input type="text" id="fname" placeholder="اسمك الكريم" maxlength="60"></div>
+          <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="femail" placeholder="بريدك الإلكتروني" maxlength="100"></div>
+          <div class="form-group full"><label>الموضوع</label><input type="text" id="fsubject" placeholder="موضوع الرسالة" maxlength="100"></div>
+          <div class="form-group full"><label>الرسالة</label><textarea id="fmessage" placeholder="اكتب رسالتك هنا..." maxlength="1000"></textarea></div>
+        </div>
+        <button class="btn-send" onclick="sendForm()">📤 إرسال الرسالة</button>
+      </div>
+    </div>
+
+    <!-- SHARE -->
+    <div class="share-wrap fade-in" style="margin-top:24px">
+      <a class="share-btn share-wa" href="#" onclick="shareWa(event)">📲 شارك على واتساب</a>
+      <button class="share-btn share-copy" id="shareCopyBtn" onclick="shareLink()">🔗 نسخ رابط الموقع</button>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div>تم إنشاء الموقع بواسطة <span>محمد رمضان أحمد محمد عبد الخالق</span> · &copy; 2026</div>
+    <div class="footer-lock">🔒 SECURED &amp; OPTIMIZED</div>
+  </footer>
+</div>
+
+<a class="scroll-top" id="scrollTop" href="#" aria-label="للأعلى">↑</a>
+
+<!-- WHATSAPP FLOAT -->
+<a class="wa-btn" href="https://wa.me/201031066237" target="_blank" rel="noopener noreferrer" aria-label="واتساب">
+  <span class="wa-tooltip">تواصل عبر واتساب</span>
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+
+<script>
+(function(){
+'use strict';
+
+/* LOADER */
+var loaderMsgs=['[+] تهيئة النظام...','[+] تحميل الملفات...','[+] فحص الأمان...','[+] جاهز!'];
+var loaderLines=document.getElementById('loaderLines');
+var loaderBar=document.getElementById('loaderBar');
+var loader=document.getElementById('loader');
+var delay=0;
+loaderMsgs.forEach(function(msg,i){
+  setTimeout(function(){
+    var el=document.createElement('div');
+    el.className='loader-line';
+    el.style.animationDelay='0s';
+    el.innerHTML='<span class="ok">'+msg+'</span>';
+    if(loaderLines)loaderLines.appendChild(el);
+    if(loaderBar)loaderBar.style.width=((i+1)/loaderMsgs.length*100)+'%';
+  },delay);
+  delay+=520;
+});
+setTimeout(function(){if(loader)loader.classList.add('hide');},delay+400);
+
+/* PARTICLES */
+var canvas=document.getElementById('particleCanvas');
+var ctx=canvas?canvas.getContext('2d'):null;
+var particles=[];
+var W,H;
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+if(canvas&&ctx&&window.matchMedia('(prefers-reduced-motion:no-preference)').matches){
+  resize();
+  window.addEventListener('resize',resize,{passive:true});
+  var COUNT=Math.min(60,Math.floor(window.innerWidth/18));
+  for(var i=0;i<COUNT;i++){
+    particles.push({
+      x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,
+      vx:(Math.random()-.5)*.5,vy:(Math.random()-.5)*.5,
+      r:Math.random()*2+1
+    });
+  }
+  var isDarkMode=true;
+  function getColor(){return isDarkMode?'0,255,136':'0,119,68';}
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    var col=getColor();
+    particles.forEach(function(p){
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0||p.x>W)p.vx*=-1;
+      if(p.y<0||p.y>H)p.vy*=-1;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='rgba('+col+',.6)';
+      ctx.fill();
+    });
+    for(var a=0;a<particles.length;a++){
+      for(var b=a+1;b<particles.length;b++){
+        var dx=particles[a].x-particles[b].x;
+        var dy=particles[a].y-particles[b].y;
+        var dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<130){
+          ctx.beginPath();
+          ctx.moveTo(particles[a].x,particles[a].y);
+          ctx.lineTo(particles[b].x,particles[b].y);
+          ctx.strokeStyle='rgba('+col+','+(1-dist/130)*.18+')';
+          ctx.lineWidth=.7;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+  window._setParticleDark=function(d){isDarkMode=d;};
+}
+
+/* WELCOME TOAST */
+var toastShown=false;
+function showToast(){
+  if(toastShown)return;
+  try{if(sessionStorage.getItem('toast_shown'))return;}catch(e){}
+  toastShown=true;
+  var toast=document.getElementById('welcomeToast');
+  if(!toast)return;
+  setTimeout(function(){
+    toast.classList.add('show');
+    setTimeout(function(){closeToast();},5600);
+  },2800);
+}
+window.closeToast=function(){
+  var toast=document.getElementById('welcomeToast');
+  if(!toast)return;
+  toast.classList.remove('show');
+  toast.classList.add('hide');
+  try{sessionStorage.setItem('toast_shown','1');}catch(e){}
+};
+showToast();
+
+/* TYPEWRITER */
+var phrases=['الأمن السيبراني','اختبار الاختراق','البرمجة','تأمين الشبكات','كشف الثغرات'];
+var pi=0,ci=0,del=false;
+var typed=document.getElementById('typed');
+function type(){
+  if(!typed)return;
+  var word=phrases[pi];
+  if(!del){typed.textContent=word.slice(0,++ci);if(ci===word.length){del=true;setTimeout(type,1800);return;}}
+  else{typed.textContent=word.slice(0,--ci);if(ci===0){del=false;pi=(pi+1)%phrases.length;setTimeout(type,400);return;}}
+  setTimeout(type,del?55:95);
+}
+setTimeout(type,2200);
+
+/* THEME */
+var html=document.documentElement;
+var themeBtn=document.getElementById('themeBtn');
+var isDark=true;
+function setTheme(dark){
+  isDark=dark;
+  html.setAttribute('data-theme',dark?'':'light');
+  themeBtn.textContent=dark?'🌙 ليلي':'☀️ نهاري';
+  if(window._setParticleDark)window._setParticleDark(dark);
+  try{localStorage.setItem('theme',dark?'dark':'light');}catch(e){}
+}
+try{var saved=localStorage.getItem('theme');if(saved)setTheme(saved==='dark');}catch(e){}
+if(themeBtn)themeBtn.addEventListener('click',function(){setTheme(!isDark);});
+
+/* MOBILE MENU */
+var hbg=document.getElementById('hamburger');
+var mob=document.getElementById('mobileMenu');
+var cls=document.getElementById('closeMenu');
+window.closeNav=function(){mob.classList.remove('open');hbg.setAttribute('aria-expanded','false');hbg.classList.remove('active');document.body.style.overflow='';};
+if(hbg)hbg.addEventListener('click',function(){mob.classList.add('open');hbg.setAttribute('aria-expanded','true');hbg.classList.add('active');document.body.style.overflow='hidden';});
+if(cls)cls.addEventListener('click',closeNav);
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeNav();});
+
+/* SCROLL */
+window.scrollToId=function(id){var el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});};
+var pr=document.getElementById('progress');
+var st=document.getElementById('scrollTop');
+window.addEventListener('scroll',function(){
+  var s=window.scrollY;var tot=document.documentElement.scrollHeight-window.innerHeight;
+  if(pr)pr.style.width=(tot>0?(s/tot*100):0)+'%';
+  if(st)st.classList.toggle('visible',s>400);
+},{passive:true});
+
+/* FADE IN */
+if('IntersectionObserver' in window){
+  var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{threshold:0.07});
+  document.querySelectorAll('.fade-in').forEach(function(el){obs.observe(el);});
+}else{document.querySelectorAll('.fade-in').forEach(function(el){el.classList.add('visible');});}
+
+/* VISITORS */
+var vcEl=document.getElementById('visitorCount');
+if(vcEl){
+  try{
+    var vc=parseInt(localStorage.getItem('vc_count')||'0')||Math.floor(Math.random()*800+200);
+    var lastVisit=localStorage.getItem('vc_last');
+    var today=new Date().toDateString();
+    if(lastVisit!==today){vc++;localStorage.setItem('vc_count',vc);localStorage.setItem('vc_last',today);}
+    var display=0;
+    var iv=setInterval(function(){display+=Math.ceil(vc/40);if(display>=vc){display=vc;clearInterval(iv);}vcEl.textContent=display.toLocaleString('ar-EG');},30);
+  }catch(e){vcEl.textContent='٥٠٠+';}
+}
+
+/* FORM */
+window.sendForm=function(){
+  var name=document.getElementById('fname').value.trim();
+  var email=document.getElementById('femail').value.trim();
+  var subject=document.getElementById('fsubject').value.trim();
+  var msg=document.getElementById('fmessage').value.trim();
+  if(!name||!email||!msg){alert('من فضلك اكمل الاسم والبريد والرسالة');return;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){alert('البريد الإلكتروني غير صحيح');return;}
+  window.location.href='mailto:cr7@gmail.com?subject='+encodeURIComponent(subject||'رسالة من الموقع')+'&body='+encodeURIComponent('الاسم: '+name+'\nالبريد: '+email+'\n\n'+msg);
+  document.getElementById('formContent').style.display='none';
+  document.getElementById('formSuccess').classList.add('show');
+  setTimeout(function(){
+    document.getElementById('formContent').style.display='block';
+    document.getElementById('formSuccess').classList.remove('show');
+    ['fname','femail','fsubject','fmessage'].forEach(function(id){document.getElementById(id).value='';});
+  },4000);
+};
+
+/* CV */
+window.downloadCV=function(e){
+  e.preventDefault();
+  var c='محمد رمضان أحمد محمد عبد الخالق\nمبرمج | أمن سيبراني\nهاتف: 01031066237\nبريد: cr7@gmail.com\n\nالمهارات:\n- اختبار الاختراق\n- Python, JavaScript, C++, Bash\n- تحليل الشبكات\n- التشفير وحماية البيانات\n- أمان الويب (OWASP)\n- Linux & Systems\n\nالخبرات:\n2022-الآن: متخصص أمن سيبراني\n2020-2022: مطور برمجيات\n2019-2020: مستقل Freelancer\n\nالخدمات:\n- اختبار الاختراق من 500 جنيه\n- تأمين المواقع من 300 جنيه\n- تطوير أدوات أمنية من 800 جنيه\n- استشارات أمنية من 400 جنيه\n\n© 2026';
+  var blob=new Blob([c],{type:'text/plain;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='محمد_رمضان_السيرة_الذاتية.txt';
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);URL.revokeObjectURL(url);
+};
+
+/* COPY PHONE */
+window.copyPhone=function(){
+  var num='01031066237';
+  var btn=document.getElementById('copyPhoneBtn');
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(num).then(function(){
+      btn.textContent='✅ تم النسخ!';btn.classList.add('copied');
+      setTimeout(function(){btn.textContent='📋 نسخ الرقم';btn.classList.remove('copied');},2000);
+    });
+  } else {
+    var ta=document.createElement('textarea');ta.value=num;
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');
+    document.body.removeChild(ta);
+    btn.textContent='✅ تم النسخ!';btn.classList.add('copied');
+    setTimeout(function(){btn.textContent='📋 نسخ الرقم';btn.classList.remove('copied');},2000);
+  }
+};
+
+/* SHARE */
+window.shareWa=function(e){
+  e.preventDefault();
+  var msg='👨‍💻 محمد رمضان - مبرمج ومتخصص أمن سيبراني\n📱 01031066237\n✉️ cr7@gmail.com\n\n🔗 '+window.location.href;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank','noopener,noreferrer');
+};
+window.shareLink=function(){
+  var btn=document.getElementById('shareCopyBtn');
+  var url=window.location.href;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(url).then(function(){
+      btn.textContent='✅ تم نسخ الرابط!';btn.classList.add('copied');
+      setTimeout(function(){btn.textContent='🔗 نسخ رابط الموقع';btn.classList.remove('copied');},2500);
+    });
+  } else {
+    var ta=document.createElement('textarea');ta.value=url;
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');
+    document.body.removeChild(ta);
+    btn.textContent='✅ تم نسخ الرابط!';btn.classList.add('copied');
+    setTimeout(function(){btn.textContent='🔗 نسخ رابط الموقع';btn.classList.remove('copied');},2500);
+  }
+};
+
+/* LANGUAGE TOGGLE */
+var isAr=true;
+var translations={
+  // NAV
+  'المهارات':'Skills','الخبرات':'Experience','الخدمات':'Services','المشاريع':'Projects','التواصل':'Contact',
+  // HERO
+  'مرحباً، أنا':'Hello, I am','متخصص في':'Specialized in',
+  // STATS
+  'سنوات خبرة':'Years Exp','مشروع مكتمل':'Projects','ثغرة مكتشفة':'Vulnerabilities Found','منافسات أمنية':'CTF Competitions',
+  'عدد الزوار:':'Visitors:',
+  // SECTIONS
+  'ما أتقنه':'What I Master','// المهارات':'// SKILLS',
+  'المسيرة المهنية':'Career Timeline','// الخبرات':'// EXPERIENCE',
+  'ما أقدمه':'My Services','// الخدمات':'// SERVICES',
+  'أبرز أعمالي':'My Projects','// المشاريع':'// PROJECTS',
+  'تواصل معي':'Get In Touch','// التواصل':'// CONTACT',
+  // SKILLS
+  'اختبار الاختراق':'Penetration Testing','فحص الأنظمة واكتشاف الثغرات بأدوات متخصصة':'System scanning and vulnerability discovery using specialized tools',
+  'البرمجة':'Programming',
+  'تحليل الشبكات':'Network Analysis','مراقبة حركة الشبكة واكتشاف التهديدات':'Monitor network traffic and detect threats',
+  'التشفير':'Cryptography','تطبيق بروتوكولات التشفير وحماية البيانات':'Applying encryption protocols and data protection',
+  'أمان الويب':'Web Security',
+  'إدارة وتأمين الأنظمة والخوادم':'Managing and securing systems and servers',
+  // TIMELINE
+  'متخصص أمن سيبراني':'Cybersecurity Specialist',
+  'مطور برمجيات':'Software Developer',
+  'مستقل Freelancer':'Freelancer',
+  'اختبار اختراق الأنظمة والشبكات، إعداد تقارير الثغرات، وتطوير سياسات الأمان للمؤسسات.':'Penetration testing of systems and networks, vulnerability reporting, and developing security policies.',
+  'تطوير تطبيقات ويب وأدوات أمنية باستخدام Python وJavaScript مع التركيز على الأمان.':'Developing web applications and security tools using Python and JavaScript with a security focus.',
+  'تقديم خدمات فحص الثغرات واختبار الاختراق لعملاء متعددين محلياً وإقليمياً.':'Providing vulnerability assessment and penetration testing services to multiple clients locally and regionally.',
+  // SERVICES
+  'فحص شامل للأنظمة والمواقع والشبكات لاكتشاف الثغرات قبل المهاجمين مع تقرير مفصل.':'Comprehensive scanning of systems, websites and networks to discover vulnerabilities before attackers, with a detailed report.',
+  'مراجعة وتأمين تطبيقات الويب ضد OWASP Top 10 وحمايتها من الاختراق.':'Reviewing and securing web applications against OWASP Top 10 and protecting from breaches.',
+  'تأمين المواقع':'Website Security',
+  'تطوير أدوات أمنية':'Security Tools Development',
+  'برمجة أدوات مخصصة لفحص الأمان وأتمتة المهام الأمنية بلغة Python.':'Programming custom tools for security scanning and automating security tasks with Python.',
+  'استشارات أمنية':'Security Consulting',
+  'تقييم الوضع الأمني للمؤسسة ووضع خطة حماية شاملة ومراجعة السياسات الأمنية.':'Evaluating the organization\'s security posture and developing a comprehensive protection plan.',
+  // PROJECTS
+  'نظام كشف التسلل الذكي':'Smart Intrusion Detection System',
+  'نظام IDS يعتمد على الذكاء الاصطناعي لرصد الأنشطة المشبوهة في الوقت الفعلي.':'An AI-based IDS for real-time monitoring of suspicious activities.',
+  'أداة فحص ثغرات الويب':'Web Vulnerability Scanner',
+  'أداة تكشف ثغرات OWASP Top 10 تلقائياً مع تقارير مفصلة.':'A tool that automatically detects OWASP Top 10 vulnerabilities with detailed reports.',
+  'منصة إدارة الحوادث الأمنية':'Security Incident Management Platform',
+  'منصة لتتبع وإدارة الحوادث الأمنية مع لوحة تحكم تحليلية.':'A platform for tracking and managing security incidents with an analytics dashboard.',
+  // CONTACT
+  'الهاتف / واتساب':'Phone / WhatsApp',
+  'البريد الإلكتروني':'Email',
+  '📋 نسخ الرقم':'📋 Copy Number',
+  '💬 أرسل رسالة مباشرة':'💬 Send a Direct Message',
+  'الاسم':'Name','البريد الإلكتروني':'Email','الموضوع':'Subject','الرسالة':'Message',
+  'اسمك الكريم':'Your name','بريدك الإلكتروني':'Your email','موضوع الرسالة':'Message subject','اكتب رسالتك هنا...':'Write your message here...',
+  '📤 إرسال الرسالة':'📤 Send Message',
+  '📲 شارك على واتساب':'📲 Share on WhatsApp',
+  '🔗 نسخ رابط الموقع':'🔗 Copy Website Link',
+  // FOOTER
+  'تم إنشاء الموقع بواسطة':'Created by',
+  // BUTTONS
+  'available_for_work.exe':'available_for_work.exe',
+  '📬 تواصل معي':'📬 Contact Me',
+  '🗂️ المشاريع':'🗂️ Projects',
+  '📄 السيرة الذاتية':'📄 Download CV',
+  'مبرمج شغوف ومتخصص في مجال الأمن السيبراني، أجمع بين مهارات البرمجة القوية وخبرة عميقة في حماية الأنظمة واكتشاف الثغرات. أسعى دائماً لبناء حلول تقنية آمنة ومتينة.':'A passionate programmer and cybersecurity specialist. I combine strong programming skills with deep expertise in system protection and vulnerability discovery, always striving to build secure and robust solutions.'
+};
+var langBtn=document.getElementById('langBtn');
+function toggleLang(){
+  isAr=!isAr;
+  document.documentElement.setAttribute('lang',isAr?'ar':'en');
+  document.documentElement.setAttribute('dir',isAr?'rtl':'ltr');
+  langBtn.textContent=isAr?'EN':'عربي';
+  if(isAr){location.reload();}
+  else{
+    document.querySelectorAll('*').forEach(function(el){
+      if(el.childNodes.length===1&&el.childNodes[0].nodeType===3){
+        var t=el.textContent.trim();
+        if(translations[t])el.textContent=translations[t];
+      }
+      if(el.tagName==='INPUT'||el.tagName==='TEXTAREA'){
+        var ph=el.getAttribute('placeholder');
+        if(ph&&translations[ph])el.setAttribute('placeholder',translations[ph]);
+      }
+    });
+  }
+}
+if(langBtn)langBtn.addEventListener('click',toggleLang);
+
+/* SECURITY */
+document.addEventListener('contextmenu',function(e){e.preventDefault();});
+document.addEventListener('keydown',function(e){
+  if(e.key==='F12'||(e.ctrlKey&&e.shiftKey&&'IJC'.includes(e.key))||(e.ctrlKey&&e.key==='U'))e.preventDefault();
+});
+
+})();
+</script>
+</body>
+</html>
